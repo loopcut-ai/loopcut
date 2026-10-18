@@ -3,23 +3,23 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "loopcut-render"
+name = "loopcut"
 version = "0.1.0"
-description = "Render .blend files on Loopcut's cloud GPUs from Claude Code, Codex or a shell, billed to your Loopcut credits."
+description = "Loopcut's cloud tools for Claude Code, Codex and other agents: render .blend files on cloud GPUs, search free assets, make 3D models, sound effects and voice lines, billed to your Loopcut credits."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 dependencies = []
-keywords = ["blender", "render", "mcp", "cloud", "loopcut"]
+keywords = ["blender", "render", "mcp", "cloud", "loopcut", "3d", "assets"]
 
 [project.urls]
 Homepage = "https://loopcut.org/render"
 Documentation = "https://loopcut.org/docs/render"
-Source = "https://github.com/loopcut-ai/loopcut-render"
+Source = "https://github.com/loopcut-ai/loopcut"
 
 [project.scripts]
-loopcut-render = "loopcut_render.cli:main"
+loopcut = "loopcut.cli:main"
 
 [tool.setuptools.package-data]
-loopcut_render = ["render_input.json", "addon/VENDORED.md"]
+loopcut = ["catalog.json", "agent_tools.json", "addon/VENDORED.md"]

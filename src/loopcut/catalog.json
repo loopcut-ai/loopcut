@@ -1,0 +1,955 @@
+{
+ "source": "https://loopcut-web.vercel.app/v1/manifest",
+ "taken_at": "2026-10-18T21:08:44+00:00",
+ "capabilities": {
+  "blob_multipart": {
+   "min_size": 16777216
+  }
+ },
+ "tools": [
+  {
+   "byok": null,
+   "cost": {
+    "quote_required": false,
+    "credits_estimate": 0
+   },
+   "kind": "assist",
+   "name": "asset_search",
+   "apply": "attach_report",
+   "title": "Search assets",
+   "output": {
+    "type": "report",
+    "formats": [
+     "json"
+    ]
+   },
+   "display": {
+    "title": "Loopcut cloud asset library",
+    "summary": "Search a hosted library of free models, materials and HDRIs.",
+    "category": "assets"
+   },
+   "latency": "seconds",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Finds existing models, materials, HDRIs or textures, including public Blender remote asset libraries, using query, source, license and size filters, with licence and credit attached. Use it to discover reusable assets. Searches are free, return at most 50 results and usually take 1–10 seconds; license any currently searches the same CC0 sources. The report attaches to the model; import selected results with existing asset tools or direct downloads.",
+   "file_inputs": [],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "query"
+    ],
+    "properties": {
+     "kind": {
+      "anyOf": [
+       {
+        "enum": [
+         "model",
+         "material",
+         "hdri",
+         "texture",
+         "any"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "array",
+        "items": {
+         "enum": [
+          "model",
+          "material",
+          "hdri",
+          "texture"
+         ],
+         "type": "string"
+        },
+        "minItems": 1,
+        "uniqueItems": true
+       }
+      ],
+      "description": "Asset category to search: one kind, a list of kinds, or any for every kind. Defaults to model."
+     },
+     "limit": {
+      "type": "integer",
+      "maximum": 50,
+      "minimum": 1,
+      "description": "Maximum number of search results. Defaults to 10."
+     },
+     "query": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "description": "Search terms describing the desired asset; at most 1000 characters."
+     },
+     "license": {
+      "enum": [
+       "cc0",
+       "any"
+      ],
+      "type": "string",
+      "description": "License filter. Defaults to cc0; any currently returns the same CC0 sources."
+     },
+     "sources": {
+      "type": "array",
+      "items": {
+       "enum": [
+        "polyhaven",
+        "ambientcg",
+        "physicallybased"
+       ],
+       "type": "string"
+      },
+      "minItems": 1,
+      "description": "Libraries to search. Defaults to all.",
+      "uniqueItems": true
+     },
+     "max_polycount": {
+      "type": "integer",
+      "maximum": 10000000,
+      "minimum": 1,
+      "description": "Maximum source-stated polygon count, for models only; ignored for other kinds. Assets with no stated polycount are excluded when set. Defaults to no cap."
+     },
+     "min_resolution": {
+      "type": "integer",
+      "maximum": 32768,
+      "minimum": 256,
+      "description": "Minimum longest side in pixels of the largest texture, HDRI or model texture set offered by the source. Assets with no stated resolution are excluded when set. Defaults to no minimum."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "B",
+   "status": "live"
+  },
+  {
+   "byok": {
+    "key_name": "FAL_KEY",
+    "provider": "fal",
+    "data_class": "C"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 10
+   },
+   "kind": "assist",
+   "name": "auto_rig",
+   "apply": "import_model",
+   "title": "Rig humanoid",
+   "output": {
+    "type": "model_3d",
+    "formats": [
+     "glb"
+    ]
+   },
+   "display": {
+    "title": "Auto-rig",
+    "summary": "Add a skeleton and skin weights to a humanoid character.",
+    "category": "characters"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Adds a humanoid skeleton and skin weights to an uploaded GLB character. Use it for an unrigged human-shaped mesh with clearly separated limbs, not creatures, props or retargeting an existing animation; creatures are planned later. GLBs are limited to 100 MB and rig_type is humanoid only in v0; processing usually takes 1–5 minutes. Applying the result imports the rigged model and armature into the scene.",
+   "file_inputs": [
+    {
+     "field": "model",
+     "accept": [
+      "model/gltf-binary"
+     ],
+     "max_mb": 100,
+     "required": true
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [],
+    "properties": {
+     "rig_type": {
+      "enum": [
+       "humanoid"
+      ],
+      "type": "string",
+      "description": "Skeleton type. Defaults to humanoid, the only supported type in v0; creatures are planned later."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "C",
+   "status": "coming_soon"
+  },
+  {
+   "byok": {
+    "key_name": "ELEVENLABS_API_KEY",
+    "provider": "elevenlabs",
+    "data_class": "C"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 18
+   },
+   "kind": "assist",
+   "name": "dialogue_from_recordings",
+   "apply": "add_audio_strip",
+   "title": "Dialogue from recordings",
+   "output": {
+    "type": "audio",
+    "formats": [
+     "wav"
+    ]
+   },
+   "display": {
+    "title": "Dialogue from your recordings",
+    "summary": "Match your recorded takes to script lines and place them on the timeline.",
+    "category": "audio"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Matches recorded takes to speaker-labelled script lines and returns cleaned dialogue audio plus a matching report. Use it to assemble an existing performance, not to invent missing words or synthesize a voice; it remains available with generation off. A recording bundle and quote are required, and processing usually takes a few minutes per recorded minute, depending on cleanup and the number of takes. Applying the result adds one audio strip per matched line to the sequencer and attaches the report of matches and gaps.",
+   "file_inputs": [],
+   "bundle_input": {
+    "accept": [
+     "audio/wav",
+     "audio/mpeg"
+    ],
+    "required": true,
+    "description": "Bundle of raw recording takes in WAV or MP3 format, referenced by a bundle manifest; the script is supplied separately in input. Include the recording blobs as bundle members."
+   },
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "script"
+    ],
+    "properties": {
+     "script": {
+      "type": "string",
+      "maxLength": 100000,
+      "minLength": 1,
+      "description": "Script lines with speaker names, for example Ada: Hello. The recordings must contain the requested lines; at most 100000 characters."
+     },
+     "language": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*|[xX](?:-[A-Za-z0-9]{1,8})+|[iI]-[A-Za-z0-9]{1,8})$",
+      "maxLength": 63,
+      "minLength": 2,
+      "description": "BCP-47 language tag, for example en-US or fr-FR. Defaults to en-US; supported languages depend on the route."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "C",
+   "status": "coming_soon"
+  },
+  {
+   "byok": {
+    "key_name": "OPENAI_API_KEY",
+    "provider": "openai",
+    "data_class": "A"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 6
+   },
+   "kind": "gen",
+   "name": "image_edit",
+   "apply": "add_image_reference",
+   "title": "Edit image",
+   "output": {
+    "type": "image",
+    "formats": [
+     "png"
+    ]
+   },
+   "display": {
+    "title": "Image editing",
+    "summary": "Change an existing image or render with a text instruction.",
+    "category": "images"
+   },
+   "latency": "seconds",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Changes an existing image from a text instruction, including restyling a render or changing a selected area. Use a mask for a local change; use image generation for a new composition and scene tools for exact geometry changes. The source is required and source/mask uploads are limited to 50 MB each; an optional PNG alpha mask must match its dimensions, with transparent pixels marking the area to edit, and edits usually take 15–90 seconds. Applying the result adds an image reference to the scene.",
+   "file_inputs": [
+    {
+     "field": "image",
+     "accept": [
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+     ],
+     "max_mb": 50,
+     "required": true
+    },
+    {
+     "field": "mask",
+     "accept": [
+      "image/png"
+     ],
+     "max_mb": 50,
+     "required": false
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "properties": {
+     "size": {
+      "enum": [
+       "1024x1024",
+       "1536x1024",
+       "1024x1536"
+      ],
+      "type": "string",
+      "description": "Output width and height in pixels. Defaults to 1024x1024."
+     },
+     "prompt": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "description": "Describe the changes to make and the features to preserve; at most 4000 characters."
+     },
+     "quality": {
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "type": "string",
+      "description": "Image detail and compute budget. Defaults to medium; high (HD) costs 20 credits versus 6 for low or medium, at any size."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "coming_soon"
+  },
+  {
+   "byok": {
+    "key_name": "OPENAI_API_KEY",
+    "provider": "openai",
+    "data_class": "A"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 6
+   },
+   "kind": "gen",
+   "name": "image_generate",
+   "apply": "add_image_reference",
+   "title": "Generate image",
+   "output": {
+    "type": "image",
+    "formats": [
+     "png"
+    ]
+   },
+   "display": {
+    "title": "Image generation",
+    "summary": "Create a reference image or backplate from a text prompt.",
+    "category": "images"
+   },
+   "latency": "seconds",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Creates a still image from a prompt, optionally guided by a reference image. Use it for concept art, backplates or visual references; use image editing to change an existing image and a 3D tool for geometry. Prompts are limited to 4000 characters and reference images to 20 MB; results usually take 15–90 seconds. Applying the result adds an image reference to the scene.",
+   "file_inputs": [
+    {
+     "field": "reference",
+     "accept": [
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+     ],
+     "max_mb": 20,
+     "required": false
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "properties": {
+     "size": {
+      "enum": [
+       "1024x1024",
+       "1536x1024",
+       "1024x1536"
+      ],
+      "type": "string",
+      "description": "Output width and height in pixels. Defaults to 1024x1024."
+     },
+     "prompt": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "description": "Describe the subject, composition, lighting and visual style; at most 4000 characters."
+     },
+     "quality": {
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "type": "string",
+      "description": "Image detail and compute budget. Defaults to medium; high (HD) costs 20 credits versus 6 for low or medium, at any size."
+     },
+     "background": {
+      "enum": [
+       "opaque",
+       "transparent"
+      ],
+      "type": "string",
+      "description": "Output background treatment. Defaults to opaque; transparent produces a PNG with alpha."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "coming_soon"
+  },
+  {
+   "byok": {
+    "key_name": "FAL_KEY",
+    "provider": "fal",
+    "data_class": "A"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 80
+   },
+   "kind": "gen",
+   "name": "image_to_3d",
+   "apply": "import_model",
+   "title": "Image to 3D model",
+   "output": {
+    "type": "model_3d",
+    "formats": [
+     "glb"
+    ]
+   },
+   "display": {
+    "title": "Image to 3D",
+    "summary": "Turn an image or a description into a textured 3D model.",
+    "category": "3d_models"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Creates a GLB mesh with PBR materials from an image, a prompt or both; at least one of image and prompt is required. Use it for a new prop or concept mesh, not dimensionally exact CAD or cleanup of an existing mesh. Drafts cost 25 credits and finals 80, usually taking 1–5 minutes; hidden surfaces are inferred and quads do not guarantee animation-ready edge flow. Applying the result imports the model and its materials into the scene.",
+   "file_inputs": [
+    {
+     "field": "image",
+     "accept": [
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+     ],
+     "max_mb": 20,
+     "required": false
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [],
+    "properties": {
+     "prompt": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "description": "Describe the object to generate. Optional when an image file is supplied; otherwise required, at most 4000 characters."
+     },
+     "quality": {
+      "enum": [
+       "draft",
+       "final"
+      ],
+      "type": "string",
+      "description": "Generation detail. Defaults to final (80 credits); draft costs 25 credits."
+     },
+     "textured": {
+      "type": "boolean",
+      "description": "Include PBR materials and textures. Defaults to true; false returns geometry only."
+     },
+     "topology": {
+      "enum": [
+       "triangles",
+       "quads"
+      ],
+      "type": "string",
+      "description": "Preferred face topology. Defaults to triangles; quads are a target rather than a guarantee of clean edge flow."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "live"
+  },
+  {
+   "byok": null,
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 5
+   },
+   "kind": "assist",
+   "name": "lip_sync",
+   "apply": "apply_shape_keys",
+   "title": "Lip sync audio",
+   "output": {
+    "type": "report",
+    "formats": [
+     "json"
+    ]
+   },
+   "display": {
+    "title": "Lip sync",
+    "summary": "Animate a character's existing mouth shapes from a speech recording.",
+    "category": "characters"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Creates mouth animation curves from an existing speech recording for a mesh with viseme shape keys. Use it to synchronize a prepared face to recorded dialogue, not to generate speech, create missing shape keys or rig a face. Audio must be WAV or MP3 up to 100 MB; processing usually takes seconds to a few minutes per recorded minute and requires the target mesh’s existing viseme names. Applying the result animates those shape keys on the target mesh at the requested frame rate.",
+   "file_inputs": [
+    {
+     "field": "audio",
+     "accept": [
+      "audio/wav",
+      "audio/mpeg"
+     ],
+     "max_mb": 100,
+     "required": true
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "shape_keys"
+    ],
+    "properties": {
+     "fps": {
+      "type": "number",
+      "maximum": 120,
+      "minimum": 1,
+      "description": "Animation frames per second, including fractional rates such as 29.97. Defaults to 24."
+     },
+     "shape_keys": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 256,
+       "minLength": 1,
+       "description": "An existing viseme shape-key name on the target mesh."
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "description": "Names of the target mesh’s existing viseme shape keys. Required; 1–64 unique names.",
+      "uniqueItems": true
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "coming_soon"
+  },
+  {
+   "byok": null,
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 5
+   },
+   "kind": "assist",
+   "name": "render",
+   "apply": "load_frames",
+   "title": "Render scene",
+   "output": {
+    "type": "render_frames",
+    "formats": [
+     "png",
+     "json"
+    ]
+   },
+   "display": {
+    "title": "Cloud rendering",
+    "summary": "Render your scene on cloud GPUs and get the frames back.",
+    "category": "render"
+   },
+   "latency": "long",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Renders the bundled Blender scene with Cycles or EEVEE on cloud GPUs and returns frames plus a QA report. Use it for final stills, frame ranges or a 360° turntable of an existing scene, not image generation or an interactive viewport preview. Render with the scene's own engine: pass engine \"eevee\" for a scene set to EEVEE. A self-contained scene bundle and a quote are required, and it costs 5 credits per GPU-minute with a one-minute minimum; render time ranges from minutes to hours depending on scene complexity, frame count and samples. Applying the result loads the frames and attaches the QA report.",
+   "file_inputs": [],
+   "bundle_input": {
+    "required": true,
+    "description": "Self-contained Blender scene bundle: entry is a .blend file, with all textures, linked libraries, caches and other external dependencies collected at relative paths. Member MIME types are unrestricted to support scene dependencies."
+   },
+   "input_schema": {
+    "type": "object",
+    "required": [],
+    "properties": {
+     "camera": {
+      "type": "string",
+      "maxLength": 256,
+      "minLength": 1,
+      "description": "Name of the scene camera object. If omitted, use the active camera in the bundle."
+     },
+     "engine": {
+      "enum": [
+       "cycles",
+       "eevee"
+      ],
+      "type": "string",
+      "description": "Render engine. Use the scene's own: \"eevee\" when scene.render.engine is BLENDER_EEVEE. Defaults to \"cycles\"."
+     },
+     "denoise": {
+      "type": "boolean",
+      "description": "Denoise rendered frames (Cycles; EEVEE ignores it). Defaults to true."
+     },
+     "samples": {
+      "type": "integer",
+      "maximum": 4096,
+      "minimum": 1,
+      "description": "Samples per pixel: Cycles samples, or EEVEE render samples. Defaults to 128 for Cycles and 64 for EEVEE."
+     },
+     "frame_end": {
+      "type": "integer",
+      "maximum": 1048574,
+      "minimum": -1048574,
+      "description": "Last frame to render, inclusive; must be at least frame_start. Defaults to frame_start for a single frame, or 120 frames for a turntable."
+     },
+     "turntable": {
+      "type": "object",
+      "properties": {
+       "margin": {
+        "type": "number",
+        "maximum": 3,
+        "minimum": 1,
+        "description": "Framing padding; 1 fits the targets' bounding sphere exactly. Defaults to 1.15."
+       },
+       "targets": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "maxLength": 256,
+         "minLength": 1
+        },
+        "maxItems": 64,
+        "description": "Objects to frame and orbit, usually the selection; their children are included. Empty or omitted frames the whole scene.",
+        "uniqueItems": true
+       },
+       "elevation_deg": {
+        "type": "number",
+        "maximum": 80,
+        "minimum": -80,
+        "description": "Camera height as an angle above the targets' centre. Defaults to 20."
+       }
+      },
+      "description": "Render a 360° turntable instead of the scene camera: a generated camera orbits the target objects (or the whole scene) once across frame_start..frame_end, so the frames loop seamlessly. If frame_end is omitted, renders 120 frames. A named camera only lends its lens.",
+      "additionalProperties": false
+     },
+     "frame_step": {
+      "type": "integer",
+      "maximum": 1048574,
+      "minimum": 1,
+      "description": "Spacing between rendered frames. Defaults to 1."
+     },
+     "frame_start": {
+      "type": "integer",
+      "maximum": 1048574,
+      "minimum": -1048574,
+      "description": "First frame to render, inclusive. Defaults to 1."
+     },
+     "resolution_pct": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 10,
+      "description": "Percentage of the scene output resolution. Defaults to 100."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "live"
+  },
+  {
+   "byok": {
+    "key_name": "FAL_KEY",
+    "provider": "fal",
+    "data_class": "B"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 5
+   },
+   "kind": "assist",
+   "name": "retopology",
+   "apply": "import_model",
+   "title": "Retopologize model",
+   "output": {
+    "type": "model_3d",
+    "formats": [
+     "glb"
+    ]
+   },
+   "display": {
+    "title": "Retopology",
+    "summary": "Rebuild a dense mesh with cleaner, lighter topology.",
+    "category": "3d_models"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Rebuilds an existing GLB mesh with clean quad or triangle topology, unwraps it and bakes the original's textures (base colour, normal, roughness and metallic) onto the new mesh. Typical target_faces by purpose: about 2000–5000 for a game prop or background asset, 5000–10000 for an editing or sculpting base, 10000–20000 for a hero asset or character. Without target_faces the service chooses from the source, about half its triangle count within 4000–16000 quads. It does not generate new objects or guarantee deformation-ready edge loops. Input GLBs are limited to 150 MB; the current route supports up to 20000 quads or 40000 triangles, and processing usually takes under two minutes. It usually costs 5 credits (up to 60 on the backup route), never more than the quote. Applying the result imports a new mesh into the scene.",
+   "file_inputs": [
+    {
+     "field": "model",
+     "accept": [
+      "model/gltf-binary"
+     ],
+     "max_mb": 150,
+     "required": true
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [],
+    "properties": {
+     "topology": {
+      "enum": [
+       "quads",
+       "triangles"
+      ],
+      "type": "string",
+      "description": "Preferred output face topology. Defaults to quads."
+     },
+     "target_faces": {
+      "type": "integer",
+      "maximum": 200000,
+      "minimum": 500,
+      "description": "Output face count, 500–200000; the current route supports up to 20000 quads or 40000 triangles. Omit it to let the service choose from the source. By purpose: game prop or background asset 2000–5000, editing or sculpting base 5000–10000, hero asset or character 10000–20000."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "live"
+  },
+  {
+   "byok": {
+    "key_name": "ELEVENLABS_API_KEY",
+    "provider": "elevenlabs",
+    "data_class": "C"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 4
+   },
+   "kind": "gen",
+   "name": "sfx",
+   "apply": "add_audio_strip",
+   "title": "Generate sound effect",
+   "output": {
+    "type": "audio",
+    "formats": [
+     "wav"
+    ]
+   },
+   "display": {
+    "title": "Sound effects",
+    "summary": "Create a sound effect from a short description.",
+    "category": "audio"
+   },
+   "latency": "seconds",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Creates a sound effect from a description, with optional seamless looping. Use it for impacts, ambience or foley, not spoken dialogue, music or editing a recorded sound. Duration is limited to 0.5–30 seconds; most effects take 5–30 seconds; a take up to 6 seconds costs 4 credits, plus 1 credit per extra 2 seconds. Applying the result adds an audio strip to the sequencer.",
+   "file_inputs": [],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "properties": {
+     "loop": {
+      "type": "boolean",
+      "description": "Make the start and end join for repeated playback. Defaults to false."
+     },
+     "prompt": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "description": "Describe the sound source, action, environment and acoustic character; at most 4000 characters."
+     },
+     "duration_seconds": {
+      "type": "number",
+      "maximum": 30,
+      "minimum": 0.5,
+      "description": "Length of the effect in seconds. Defaults to 2; accepted range is 0.5–30."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "C",
+   "status": "live"
+  },
+  {
+   "byok": {
+    "key_name": "GEMINI_API_KEY",
+    "provider": "gemini",
+    "data_class": "B"
+   },
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 2
+   },
+   "kind": "gen",
+   "name": "voice_line",
+   "apply": "add_audio_strip",
+   "title": "Generate voice line",
+   "output": {
+    "type": "audio",
+    "formats": [
+     "wav"
+    ]
+   },
+   "display": {
+    "title": "Voice lines",
+    "summary": "Turn written lines into spoken audio for your scene.",
+    "category": "audio"
+   },
+   "latency": "seconds",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 0
+   },
+   "backends": [
+    "managed",
+    "byok"
+   ],
+   "namespace": "loopcut_cloud",
+   "description": "Creates spoken audio from text with a selectable voice and performance direction. Use it for character lines or narration, not music, sound effects, voice cloning or cleaning a recorded performance. Text is limited to 2000 characters; a short line usually takes 5–30 seconds, at 10 credits per minute of speech, rounded up per line with a 1-credit minimum. Applying the result adds an audio strip to the sequencer.",
+   "file_inputs": [],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 2000,
+      "minLength": 1,
+      "description": "Words to speak; at most 2000 characters."
+     },
+     "voice": {
+      "enum": [
+       "Zephyr",
+       "Puck",
+       "Charon",
+       "Kore",
+       "Fenrir",
+       "Leda",
+       "Aoede",
+       "Sulafat"
+      ],
+      "type": "string",
+      "description": "Voice character: Zephyr (bright), Puck (upbeat), Charon (informative), Kore (firm), Fenrir (excitable), Leda (youthful), Aoede (breezy), Sulafat (warm). Defaults to Kore."
+     },
+     "language": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*|[xX](?:-[A-Za-z0-9]{1,8})+|[iI]-[A-Za-z0-9]{1,8})$",
+      "maxLength": 63,
+      "minLength": 2,
+      "description": "BCP-47 language tag, for example en-US or fr-FR. Defaults to en-US; supported languages depend on the route."
+     },
+     "direction": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "description": "Performance direction such as tone, pace and emotion; at most 1000 characters. If omitted, use a neutral delivery."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "status": "live"
+  }
+ ]
+}

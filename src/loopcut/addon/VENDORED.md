@@ -2,7 +2,7 @@
 
 `bundles.py`, `blobs.py` and `cloud_http.py` are byte-for-byte copies of the Loopcut add-on's
 modules (`scripts/addons_core/loopcut/` in the Loopcut Blender repository, GPL-3.0-or-later), so the
-render client packs and uploads scenes exactly as the add-on does: the same dependency
+connector packs and uploads scenes exactly as the add-on does: the same dependency
 collection, canonical manifest numbers and multipart upload retries that were fixed live on
 2026-10-17.
 

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "loopcut",
+  "version": "0.1.0",
+  "description": "Loopcut's cloud tools for Blender work: render .blend files on cloud GPUs, search free assets, make 3D models, sound effects and voice lines, billed to your Loopcut credits. Works with any Blender install.",
+  "author": {
+    "name": "Loopcut",
+    "email": "hello@loopcut.org",
+    "url": "https://loopcut.org"
+  },
+  "homepage": "https://loopcut.org/render",
+  "repository": "https://github.com/loopcut-ai/loopcut",
+  "license": "GPL-3.0-or-later",
+  "keywords": ["blender", "render", "cloud", "gpu", "assets", "3d", "audio"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Loopcut",
+        "shortDescription": "Cloud renders, free assets, 3D models and audio for Blender",
+        "longDescription": "Render a saved .blend on cloud RTX 4090s and get the frames back, search free CC0 models, materials and HDRIs, turn images into 3D models, remesh meshes, and make sound effects and voice lines. Every paid tool quotes its price first, and results come back as files Codex imports with Blender's Python. Paid from your Loopcut account's credits.",
+        "developerName": "Loopcut",
+        "category": "Design",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": "https://loopcut.org/render",
+        "privacyPolicyURL": "https://loopcut.org/privacy",
+        "termsOfServiceURL": "https://loopcut.org/terms",
+        "defaultPrompt": [
+          "Render a 120-frame turntable of chair.blend in the cloud",
+          "Find a free oak floor material for this scene",
+          "Make a short door-slam sound effect for frame 48"
+        ],
+        "brandColor": "#4A95A3",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/logo.png"
+      }
+    }
+  }
+}

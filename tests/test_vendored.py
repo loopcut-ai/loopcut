@@ -4,7 +4,7 @@ import os
 import unittest
 from pathlib import Path
 
-VENDORED = Path(__file__).resolve().parents[1] / "src" / "loopcut_render" / "addon"
+VENDORED = Path(__file__).resolve().parents[1] / "src" / "loopcut" / "addon"
 ADDON = os.environ.get("LOOPCUT_ADDON_DIR")
 
 

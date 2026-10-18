@@ -9,9 +9,9 @@
   },
   "plugins": [
     {
-      "name": "loopcut-render",
+      "name": "loopcut",
       "source": "./",
-      "description": "Render .blend files on Loopcut's cloud GPUs from Claude Code, billed to your Loopcut credits. Works with any Blender install.",
+      "description": "Loopcut's cloud tools in Claude Code: render .blend files on cloud GPUs, search free assets, make 3D models, sound effects and voice lines, billed to your Loopcut credits. Works with any Blender install.",
       "version": "0.1.0",
       "homepage": "https://loopcut.org/render",
       "license": "GPL-3.0-or-later",

@@ -1,7 +1,10 @@
-"""Small JSON records on disk: the signed-in key, quotes awaiting a start, and started jobs.
+"""Small JSON records on disk: the signed-in key, quotes awaiting a start, started jobs and the
+last tool catalog read from the server.
 
-Everything lives under LOOPCUT_RENDER_HOME, else %APPDATA%/loopcut-render on Windows and
-$XDG_CONFIG_HOME/loopcut-render (default ~/.config/loopcut-render) elsewhere. Files are
+Everything lives under LOOPCUT_CONNECTOR_HOME, else %APPDATA%/loopcut-connector on Windows and
+$XDG_CONFIG_HOME/loopcut-connector (default ~/.config/loopcut-connector) elsewhere. Not
+~/.config/loopcut: other Loopcut tools already keep files there, and the Blender add-on keeps its
+own sign-in in Blender's config folder, so this folder belongs to the connector alone. Files are
 written whole, owner-only, and replaced atomically, so the CLI and an MCP server can share them.
 """
 
@@ -13,15 +16,16 @@ import tempfile
 from pathlib import Path
 
 _ID = re.compile(r"[A-Za-z0-9_-]{1,128}\Z")
+FOLDER = "loopcut-connector"
 
 
 def home():
-    explicit = os.environ.get("LOOPCUT_RENDER_HOME")
+    explicit = os.environ.get("LOOPCUT_CONNECTOR_HOME")
     if explicit:
         return Path(explicit).expanduser()
     if sys.platform == "win32" and os.environ.get("APPDATA"):
-        return Path(os.environ["APPDATA"]) / "loopcut-render"
-    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "loopcut-render"
+        return Path(os.environ["APPDATA"]) / FOLDER
+    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / FOLDER
 
 
 def _write(path, value):

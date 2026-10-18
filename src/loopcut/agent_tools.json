@@ -1,0 +1,37 @@
+{
+  "about": "How each Loopcut cloud tool appears to the agent: its MCP tool name and a short description. Input schemas come from the server's catalog. A catalog tool missing here keeps its own name and the server's description.",
+  "tools": {
+    "render": {
+      "name": "render_quote",
+      "description": "Price a cloud render of a saved .blend on an RTX 4090. Packs the scene and every texture, library and cache it uses with a local headless Blender and uploads what the cloud lacks. While the result says status \"preparing\", call again with the same arguments. Frames default to frame 1 only. Check warnings for missing files (they render pink)."
+    },
+    "asset_search": {
+      "name": "asset_search",
+      "description": "Search free CC0 libraries (Poly Haven, ambientCG, Physically Based) for models, materials, HDRIs and textures, with licence, size, preview and download details. Try it before generating a model or texture."
+    },
+    "image_to_3d": {
+      "name": "image_to_3d",
+      "description": "Make a textured 3D model (GLB) from a prompt, a local reference image, or both. For new props and concept meshes, not exact CAD. Takes 1-5 minutes."
+    },
+    "retopology": {
+      "name": "remesh",
+      "description": "Cloud remesh: rebuild a mesh with clean quads or triangles at a target face count, with its textures baked onto the new mesh. Export the object to a .glb first. Quads come back as FBX, triangles as GLB."
+    },
+    "sfx": {
+      "name": "sound_effect",
+      "description": "Make a sound effect (WAV, 0.5-30 s) from a description: impacts, ambience, foley. Not speech or music."
+    },
+    "voice_line": {
+      "name": "voice_line",
+      "description": "Speak a line of text as WAV audio with a chosen voice and direction, for characters or narration."
+    },
+    "image_generate": {
+      "name": "image_generate",
+      "description": "Make a PNG image from a prompt, optionally guided by a local reference image: concept art, backplates, references."
+    },
+    "image_edit": {
+      "name": "image_edit",
+      "description": "Change an existing image (a local PNG, JPEG or WebP) from a text instruction, with an optional PNG mask, e.g. to restyle a render."
+    }
+  }
+}

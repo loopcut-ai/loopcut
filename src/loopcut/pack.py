@@ -77,7 +77,7 @@ def collect(blend, staging, blender):
     blend = Path(blend).expanduser().resolve()
     if not blend.is_file() or blend.suffix.lower() != ".blend":
         raise PackError(f"Not a saved .blend file: {blend}")
-    with tempfile.TemporaryDirectory(prefix="loopcut-render-pack-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="loopcut-pack-") as temporary:
         control = Path(temporary)
         for name in ("tmp", "config", "scripts"):
             (control / name).mkdir()
@@ -130,7 +130,7 @@ def upload(staging, value, *, client, multipart=None, progress=None):
     blobs.upload_missing(files, client=client, progress=progress, multipart=multipart)
     body = canonical_json(value)
     digest = hashlib.sha256(body).hexdigest()
-    with tempfile.TemporaryDirectory(prefix="loopcut-render-manifest-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="loopcut-manifest-") as temporary:
         path = Path(temporary) / "manifest.json"
         path.write_bytes(body)
         blobs.upload_missing([{"path": path, "sha256": digest, "size": len(body), "mime": "application/json"}],
@@ -142,7 +142,7 @@ def pack_and_upload(blend, *, client, blender=None, multipart=None, progress=Non
     """Collect, hash and upload a saved .blend. Returns the bundle hash and what was collected."""
     binary = find_blender(blender)
     say = progress or (lambda message: None)
-    with tempfile.TemporaryDirectory(prefix="loopcut-render-bundle-") as staging:
+    with tempfile.TemporaryDirectory(prefix="loopcut-bundle-") as staging:
         say("Collecting the scene and its files with Blender…")
         info = collect(blend, staging, binary)
         value = manifest(staging, info)

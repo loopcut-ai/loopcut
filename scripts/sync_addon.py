@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 FILES = ("bundles.py", "blobs.py", "cloud_http.py")
-TARGET = Path(__file__).resolve().parents[1] / "src" / "loopcut_render" / "addon"
+TARGET = Path(__file__).resolve().parents[1] / "src" / "loopcut" / "addon"
 
 
 def main(checkout):

@@ -1,0 +1,20 @@
+{
+  "name": "loopcut",
+  "interface": {
+    "displayName": "Loopcut"
+  },
+  "plugins": [
+    {
+      "name": "loopcut",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Design"
+    }
+  ]
+}

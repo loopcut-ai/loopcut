@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from loopcut_render import pack
+from loopcut import pack
 
 BLENDER = os.environ.get("LOOPCUT_TEST_BLENDER")
 
