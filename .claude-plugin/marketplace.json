@@ -1,0 +1,21 @@
+{
+  "name": "loopcut",
+  "owner": {
+    "name": "Loopcut",
+    "url": "https://loopcut.org"
+  },
+  "metadata": {
+    "description": "Loopcut's plugins for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "loopcut-render",
+      "source": "./",
+      "description": "Render .blend files on Loopcut's cloud GPUs from Claude Code, billed to your Loopcut credits. Works with any Blender install.",
+      "version": "0.1.0",
+      "homepage": "https://loopcut.org/render",
+      "license": "GPL-3.0-or-later",
+      "category": "rendering"
+    }
+  ]
+}

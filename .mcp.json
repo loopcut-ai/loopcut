@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "loopcut-render": {
+      "command": "uvx",
+      "args": ["--from", "${CLAUDE_PLUGIN_ROOT}", "loopcut-render", "mcp"]
+    }
+  }
+}

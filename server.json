@@ -1,0 +1,42 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.loopcut-ai/loopcut-render",
+  "title": "Loopcut Render",
+  "description": "Render Blender .blend files on cloud RTX 4090s and download the frames, paid with Loopcut credits.",
+  "websiteUrl": "https://loopcut.org/render",
+  "repository": {
+    "url": "https://github.com/loopcut-ai/loopcut-render",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "loopcut-render",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "LOOPCUT_API_KEY",
+          "description": "A Loopcut API key (lc_...) from loopcut.org/account. Optional: without it, the loopcut_login tool signs in with a browser link.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "LOOPCUT_BLENDER",
+          "description": "Path to the Blender executable used to pack scenes. Optional: found on PATH and in the usual install folders.",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "properties": {
+    "frame_start": {
+      "type": "integer",
+      "minimum": -1048574,
+      "maximum": 1048574,
+      "description": "First frame to render, inclusive. Defaults to 1."
+    },
+    "frame_end": {
+      "type": "integer",
+      "minimum": -1048574,
+      "maximum": 1048574,
+      "description": "Last frame to render, inclusive; must be at least frame_start. Defaults to frame_start for a single frame, or 120 frames for a turntable."
+    },
+    "frame_step": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1048574,
+      "description": "Spacing between rendered frames. Defaults to 1."
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "cycles",
+        "eevee"
+      ],
+      "description": "Render engine. Use the scene's own: \"eevee\" when scene.render.engine is BLENDER_EEVEE. Defaults to \"cycles\"."
+    },
+    "samples": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096,
+      "description": "Samples per pixel: Cycles samples, or EEVEE render samples. Defaults to 128 for Cycles and 64 for EEVEE."
+    },
+    "resolution_pct": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 100,
+      "description": "Percentage of the scene output resolution. Defaults to 100."
+    },
+    "camera": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Name of the scene camera object. If omitted, use the active camera in the bundle."
+    },
+    "denoise": {
+      "type": "boolean",
+      "description": "Denoise rendered frames (Cycles; EEVEE ignores it). Defaults to true."
+    },
+    "turntable": {
+      "type": "object",
+      "description": "Render a 360\u00b0 turntable instead of the scene camera: a generated camera orbits the target objects (or the whole scene) once across frame_start..frame_end, so the frames loop seamlessly. If frame_end is omitted, renders 120 frames. A named camera only lends its lens.",
+      "properties": {
+        "targets": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "description": "Objects to frame and orbit, usually the selection; their children are included. Empty or omitted frames the whole scene."
+        },
+        "elevation_deg": {
+          "type": "number",
+          "minimum": -80,
+          "maximum": 80,
+          "description": "Camera height as an angle above the targets' centre. Defaults to 20."
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Framing padding; 1 fits the targets' bounding sphere exactly. Defaults to 1.15."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

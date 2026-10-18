@@ -1,0 +1,13 @@
+{
+  "name": "loopcut-render",
+  "description": "Render .blend files on Loopcut's cloud GPUs from Claude Code, billed to your Loopcut credits. Works with any Blender install.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Loopcut",
+    "url": "https://loopcut.org"
+  },
+  "homepage": "https://loopcut.org/render",
+  "repository": "https://github.com/loopcut-ai/loopcut-render",
+  "license": "GPL-3.0-or-later",
+  "keywords": ["blender", "render", "cloud", "gpu", "cycles", "eevee"]
+}
