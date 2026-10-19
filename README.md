@@ -64,8 +64,8 @@ codex mcp add loopcut -- uvx loopcut mcp
 ```
 
 Every tool call returns within 50 s, under Codex's default 60 s tool timeout; long work carries on between
-calls. Both plugins start the server from their own folder with `uv run --frozen --project <plugin folder>
-loopcut mcp`; the package has no dependencies beyond Python.
+calls. Both plugins start the server with `uvx loopcut==<release> mcp`, pinned to the release they ship with; the
+package has no dependencies beyond Python.
 
 **Cursor, VS Code, Claude Desktop and other MCP clients**
 

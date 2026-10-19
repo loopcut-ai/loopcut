@@ -71,7 +71,7 @@ def _from_cloud(error, tool=None):
                       else "They confirm once on their Loopcut account page, then try again."))
     elif code == "insufficient_credits":
         message = (f"Not enough Loopcut credits: this needs {extra.get('needed', 'more')}, and the balance is "
-                   f"{extra.get('balance', 'lower')}. The user can add credits or upgrade at "
+                   f"{extra.get('balance', 'lower')}. The user can get a plan, or top up on Pro or Max, at "
                    f"{extra.get('upgrade') or 'their Loopcut account page'}.")
     elif code == "private_mode":
         data_class = f" (data class {extra['data_class']})" if extra.get("data_class") else ""

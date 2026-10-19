@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "loopcut": {
-      "command": "uv",
-      "args": ["run", "--frozen", "--project", "${CLAUDE_PLUGIN_ROOT}", "loopcut", "mcp"]
+      "command": "uvx",
+      "args": ["loopcut==0.1.1", "mcp"]
     }
   }
 }

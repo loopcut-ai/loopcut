@@ -54,16 +54,27 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install mcp-publisher
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.26.x"
+          cache: false
+      # Built from the registry's tagged source with the Go toolchain, not a downloaded binary.
+      - name: Build mcp-publisher v1.8.1
         run: |
-          curl -fsSL -o mcp-publisher.tar.gz https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
-          tar xzf mcp-publisher.tar.gz mcp-publisher
+          go install -ldflags "-X main.Version=v1.8.1" github.com/modelcontextprotocol/registry/cmd/publisher@v1.8.1
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - name: Wait for PyPI to serve the release
         run: |
-          for _ in $(seq 30); do
-            curl -fs "https://pypi.org/pypi/loopcut/${GITHUB_REF_NAME#v}/json" > /dev/null && exit 0
-            sleep 10
-          done
-          exit 1
-      - run: ./mcp-publisher login github-oidc
-      - run: ./mcp-publisher publish
+          python3 - "${GITHUB_REF_NAME#v}" <<'PY'
+          import sys, time, urllib.request
+          url = f"https://pypi.org/pypi/loopcut/{sys.argv[1]}/json"
+          for _ in range(30):
+              try:
+                  urllib.request.urlopen(url, timeout=10)
+                  sys.exit(0)
+              except OSError:
+                  time.sleep(10)
+          sys.exit(f"PyPI never served {url}")
+          PY
+      - run: publisher login github-oidc
+      - run: publisher publish

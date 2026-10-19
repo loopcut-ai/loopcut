@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loopcut"
-version = "0.1.0"
+version = "0.1.1"
 description = "Loopcut's cloud tools for Claude Code, Codex and other agents: render .blend files on cloud GPUs, search free assets, make 3D models, sound effects and voice lines, billed to your Loopcut credits."
 readme = "README.md"
 requires-python = ">=3.10"

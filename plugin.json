@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "loopcut",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Loopcut's cloud tools for Blender work: render .blend files on cloud GPUs, search free assets, make 3D models, sound effects and voice lines, billed to your Loopcut credits. Works with any Blender install.",
   "author": {
     "name": "Loopcut",

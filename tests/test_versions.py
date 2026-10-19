@@ -33,7 +33,10 @@ class VersionsTest(unittest.TestCase):
         self.assertEqual(openai["type"], "stdio")
         self.assertEqual([claude["command"], *claude["args"]],
                          [openai["command"], *(a.replace("${PLUGIN_ROOT}", "${CLAUDE_PLUGIN_ROOT}") for a in openai["args"])])
-        self.assertIn("--frozen", claude["args"], "the launcher runs the locked project, not a registry package")
+        # The plugin directory's lint wants a pinned registry launcher (uvx <package>==<version>) for
+        # the Verified badge; the pin must be this release, so a version bump moves it too.
+        project = re.search(r'^version = "([^"]+)"', _read("pyproject.toml"), re.M).group(1)
+        self.assertEqual([claude["command"], *claude["args"]], ["uvx", f"loopcut=={project}", "mcp"])
         marketplace = json.loads(_read(".agents/plugins/marketplace.json"))
         self.assertEqual((marketplace["name"], marketplace["plugins"][0]["name"]), ("loopcut", "loopcut"))
         interface = json.loads(_read("plugin.json"))["extensions"]["com.openai"]["interface"]

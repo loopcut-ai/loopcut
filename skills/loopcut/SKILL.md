@@ -41,15 +41,16 @@ after they approve. `loopcut_login` signs in or switches accounts on purpose.
 - Before a long render, quote and run one frame at `resolution_pct: 25` with low `samples`, look at it,
   then quote the full job.
 - Animations: frames default to frame 1 only. Pass `frame_start`/`frame_end` (the quote shows the scene's
-  range) and `frame_step` for previews. Match the engine: `engine: "eevee"` for EEVEE scenes.
+  range) and `frame_step` for previews. Match the engine: `engine: "eevee"` for EEVEE scenes. Cycles
+  needs a Pro or Max plan; on the free plan, ask before rendering a Cycles scene with EEVEE.
 - `turntable: {}` orbits the whole scene; `turntable: {"targets": ["Chair"]}` frames chosen objects.
 - Check the render quote's `warnings`: missing textures render pink. Fix them and quote again.
 - Asset search results carry licence and credit lines; show `show_credit` with them.
 
 ## Errors
 
-Errors carry a `code` and a message that says what to do. `insufficient_credits`: the user adds credits or
-upgrades. `age_confirmation_required`: they confirm once at `confirm_url`. `daily_limit_reached` or
+Errors carry a `code` and a message that says what to do. `insufficient_credits`: the user gets a plan,
+or tops up on Pro or Max. `plan_required`: Cycles needs Pro or Max; offer EEVEE or the `upgrade` link. `age_confirmation_required`: they confirm once at `confirm_url`. `daily_limit_reached` or
 `rate_limited` with a `confirm_token`: pass it back only if the user approves. `private_mode`: the
 account's Private mode blocks that tool (today, sound effects); only the user can turn it off.
 `generation_disabled`: generation is off for the account. Python in a `.blend` (drivers, startup scripts,
