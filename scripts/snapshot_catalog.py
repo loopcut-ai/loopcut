@@ -22,7 +22,7 @@ ACCOUNT_FIELDS = {"available", "unavailable_reason"}
 def main(base_url="https://loopcut.org"):
     version = re.search(r'__version__ = "([^"]+)"', (ROOT / "src" / "loopcut" / "__init__.py").read_text()).group(1)
     request = urllib.request.Request(base_url.rstrip("/") + "/v1/manifest", headers={
-        "x-loopcut-contract": "0.6", "x-loopcut-client": f"loopcut/{version}", "accept": "application/json"})
+        "x-loopcut-contract": "0.7", "x-loopcut-client": f"loopcut/{version}", "accept": "application/json"})
     with urllib.request.urlopen(request, timeout=30) as response:
         manifest = json.load(response)
     tools = sorted(({k: v for k, v in tool.items() if k not in ACCOUNT_FIELDS} for tool in manifest["tools"]),

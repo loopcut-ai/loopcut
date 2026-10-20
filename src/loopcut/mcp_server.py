@@ -42,7 +42,8 @@ asset_search is free and runs at once: try it before generating a model or textu
 render, quote a small test frame first. job_start and job_status wait for the job and download the
 results: renders into loopcut_renders/<job_id>/ next to the .blend, everything else into
 loopcut_outputs/<job_id>/ in the working folder. Import them with bpy (GLB or FBX models, WAV audio,
-PNG images). Save the scene before render_quote; the cloud renders the file on disk."""
+PNG images). Save the scene before render_quote; the cloud renders the file on disk. Motion results
+(motion.bvh) go onto the user's rig with motion_apply, which is free and runs a local Blender."""
 
 _WAIT = {"type": "integer", "minimum": 0, "maximum": MCP_WAIT_MAX,
          "description": f"Seconds to wait before returning progress (default {DEFAULT_WAIT})."}
@@ -84,6 +85,23 @@ JOB_STATUS = _fixed("job_status", "Job status and results", (
     readOnlyHint=True)  # Changes nothing on the account; it only saves the job's results locally.
 JOB_CANCEL = _fixed("job_cancel", "Cancel a job", "Cancel a queued or running job. Unspent credits are refunded.",
                     {"job_id": _JOB}, ["job_id"], readOnlyHint=False, destructiveHint=True, idempotentHint=True)
+MOTION_APPLY = _fixed("motion_apply", "Put a motion on a rig", (
+    "Retarget a motion_from_video or motion_from_text result (motion.bvh) onto the humanoid rig in a saved .blend "
+    "(Mixamo, Rigify, Auto-Rig Pro, Unreal mannequin or any humanoid by bone names) with a local headless Blender, "
+    "then save the file; the previous version stays as .blend1. Free, nothing leaves the machine. target_armature "
+    "and in_place default to what the motion tool was called with; without an armature it uses the active, the "
+    "selected or the only humanoid armature, and with none it adds SOMA's skeleton with a simple body. If the "
+    ".blend is open in Blender, run the job result's apply.bpy in that session instead. While the result says "
+    "status \"applying\", call again with the same arguments."),
+    {"blend": {"type": "string", "description": "Path to the saved .blend to animate."},
+     "bvh": {"type": "string", "description": "Path to motion.bvh from job_status (or its folder)."},
+     "target_armature": {"type": "string", "description": "Name of the armature object (or a mesh it deforms) to animate."},
+     "in_place": {"type": "boolean", "description": "Keep the pelvis over its starting position: no root travel."},
+     "frame_start": {"type": "integer", "description": "First frame of the motion (default: the scene's start frame)."},
+     "out": {"type": "string", "description": "Save to this .blend instead of overwriting the input."},
+     "blender": {"type": "string", "description": "Blender executable (default: LOOPCUT_BLENDER, PATH, then the usual install folders)."},
+     "wait_seconds": _WAIT},
+    ["blend", "bvh"], readOnlyHint=False, destructiveHint=True, idempotentHint=False)
 
 
 def _description(descriptor):
@@ -130,6 +148,14 @@ def cloud_tool(descriptor):
         properties[spec["field"]] = _file_property(spec)
         if spec.get("required"):
             required.append(spec["field"])
+    if descriptor.get("apply") == "apply_motion":
+        # Client-only (contract 0.7): kept for motion_apply, never sent to the server.
+        for name, spec in ((descriptor.get("apply_args") or {}).get("properties") or {}).items():
+            properties.setdefault(name, _lean(copy.deepcopy(spec)))
+        if "video_seconds" in properties:
+            properties["video_seconds"] = {**properties["video_seconds"], "description": (
+                "Leave it out: the connector measures the clip itself. Only when it asks (a WebM without ffprobe), "
+                "the clip's length in seconds.")}
     free = (descriptor.get("cost") or {}).get("credits_estimate") == 0
     if not free:  # Free tools are never held by a spending limit.
         properties["confirm_token"] = _CONFIRM
@@ -143,7 +169,9 @@ def cloud_tool(descriptor):
 
 
 def tool_list(catalog):
-    return [LOGIN, ACCOUNT, *(cloud_tool(descriptor) for descriptor in catalog.visible()), JOB_START, JOB_STATUS, JOB_CANCEL]
+    visible = catalog.visible()
+    local = [MOTION_APPLY] if any(descriptor.get("apply") == "apply_motion" for descriptor in visible) else []
+    return [LOGIN, ACCOUNT, *(cloud_tool(descriptor) for descriptor in visible), *local, JOB_START, JOB_STATUS, JOB_CANCEL]
 
 
 def _wait(arguments, cap=MCP_WAIT_MAX):
@@ -201,6 +229,14 @@ def _dispatch(service, name, arguments, cap):
                               out_dir=arguments.get("out_dir"))
     if name == "job_cancel":
         return service.cancel(_string(arguments, "job_id"))
+    if name == "motion_apply":
+        in_place = arguments.get("in_place")
+        if in_place is not None and type(in_place) is not bool:
+            raise LoopcutError("in_place must be true or false", "invalid_input", {"field": "in_place"})
+        return service.motion_apply(_string(arguments, "blend"), _string(arguments, "bvh"),
+                                    armature=arguments.get("target_armature") or None, in_place=in_place,
+                                    frame_start=arguments.get("frame_start"), out=arguments.get("out") or None,
+                                    blender=arguments.get("blender") or None, wait=_wait(arguments, cap))
     descriptor = service.catalog().find(name) if isinstance(name, str) else None
     if descriptor is None:
         raise LoopcutError(f"Unknown tool: {name}. The tool list may have changed; list the tools again.", "unknown_tool")

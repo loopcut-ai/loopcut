@@ -32,6 +32,14 @@
     "image_edit": {
       "name": "image_edit",
       "description": "Change an existing image (a local PNG, JPEG or WebP) from a text instruction, with an optional PNG mask, e.g. to restyle a render."
+    },
+    "motion_from_video": {
+      "name": "motion_from_video",
+      "description": "Capture a person's full-body motion, hands included, from a local MP4, MOV or WebM (one person, whole body in view, mostly still camera; at most 60 s captured, chosen with start_s and end_s). 3 credits per second captured, 2-second minimum. Returns motion.bvh (SOMA 77-joint skeleton) and motion.json; motion_apply then puts it on the user's rig in a .blend."
+    },
+    "motion_from_text": {
+      "name": "motion_from_text",
+      "description": "Make 2-10 s of humanoid body animation from a short description of one action (NVIDIA Kimodo, built with Meta Llama 3). 5 credits per second of motion. Fingers stay still; not for faces, props or finger work. Returns motion.bvh (SOMA 77-joint skeleton) and motion.json; motion_apply then puts it on the user's rig in a .blend."
     }
   }
 }

@@ -2,18 +2,18 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.loopcut-ai/loopcut",
   "title": "Loopcut",
-  "description": "Blender cloud tools for agents: GPU renders, free asset search, 3D models, sound and voice.",
+  "description": "Blender cloud tools for agents: GPU renders, free assets, 3D models, character motion, sound, voice.",
   "websiteUrl": "https://loopcut.org/render",
   "repository": {
     "url": "https://github.com/loopcut-ai/loopcut",
     "source": "github"
   },
-  "version": "0.1.1",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "loopcut",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

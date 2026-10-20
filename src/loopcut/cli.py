@@ -6,10 +6,14 @@
   loopcut run TOOL [--input JSON] [--file FIELD=PATH …] [--yes | --max-credits N] [--out DIR]
   loopcut start QUOTE_ID | status JOB_ID [--wait] | fetch JOB_ID [--out DIR] | cancel JOB_ID
   loopcut render scene.blend [--frames 1-120] [--samples 256] … [--yes | --max-credits N]
+  loopcut motion-apply --blend scene.blend --bvh motion.bvh [--armature NAME] [--in-place] [--bpy]
   loopcut mcp                                                       stdio MCP server
 
 TOOL is a name from `loopcut tools`, e.g. asset_search, image_to_3d, remesh, sound_effect,
-voice_line; render takes --blend. Results print as JSON on stdout; progress and prompts go to stderr.
+voice_line, motion_from_video, motion_from_text; render takes --blend. `run` of a motion tool with
+--blend also puts the motion on that scene's rig. motion-apply retargets a motion result with a local
+headless Blender and saves the .blend (--bpy prints Python for a Blender that is already open instead).
+Results print as JSON on stdout; progress and prompts go to stderr.
 """
 
 import argparse
@@ -87,8 +91,8 @@ def _tool_options(parser):
     parser.add_argument("--input", type=_json_object, default={}, help="the tool's inputs as a JSON object")
     parser.add_argument("--file", type=_file, action="append", default=[], metavar="FIELD=PATH",
                         help="a file input as a local path, e.g. image=photo.png")
-    parser.add_argument("--blend", help="render only: the saved .blend file")
-    parser.add_argument("--blender", help="render only: Blender executable to pack with")
+    parser.add_argument("--blend", help="render: the saved .blend file; run of a motion tool: the .blend to put the motion on")
+    parser.add_argument("--blender", help="render and motion: the Blender executable to use")
     parser.add_argument("--confirm-token", help="token from an approved daily_limit_reached or rate_limited refusal")
 
 
@@ -100,7 +104,8 @@ def _approve(parser):
 
 def _parser():
     parser = argparse.ArgumentParser(prog="loopcut", description="Loopcut's cloud tools for Blender: render, asset "
-                                     "search, image to 3D, remesh, sound and voice, paid with Loopcut credits.")
+                                     "search, image to 3D, remesh, sound and voice, motion capture and text to "
+                                     "motion, paid with Loopcut credits.")
     parser.add_argument("--version", action="version", version=f"loopcut {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("login", help="sign in to Loopcut in the browser")
@@ -130,6 +135,17 @@ def _parser():
     _render_options(render)
     render.add_argument("--out", help="folder to save into")
     _approve(render)
+    apply = commands.add_parser("motion-apply", help="put a motion result on the rig in a saved .blend (local Blender, free)")
+    apply.add_argument("--blend", help="the saved .blend to animate (not needed with --bpy)")
+    apply.add_argument("--bvh", required=True, help="motion.bvh from a motion job, or the folder it is in")
+    apply.add_argument("--armature", help="armature object (or a mesh it deforms) to animate; default: the active, "
+                       "selected or only humanoid armature, else SOMA's skeleton with a simple body")
+    apply.add_argument("--in-place", action="store_const", const=True, dest="in_place",
+                       help="keep the pelvis over its starting position (no root travel)")
+    apply.add_argument("--frame-start", type=int, help="first frame of the motion (default: the scene's start)")
+    apply.add_argument("--out", help="save to this .blend instead of overwriting --blend (Blender keeps a .blend1)")
+    apply.add_argument("--blender", help="Blender executable")
+    apply.add_argument("--bpy", action="store_true", help="print Python for a Blender that is already open, and exit")
     commands.add_parser("mcp", help="run the stdio MCP server (for Claude Code, Codex, Cursor, Claude Desktop)")
     return parser
 
@@ -228,7 +244,20 @@ def _run(service, args):
         quote = _quote(service, args)
         if quote.get("status") != "quoted":
             return quote  # A free tool already ran through.
-        return _run_quote(service, quote, args)
+        result = _run_quote(service, quote, args)
+        bvh = ((result.get("apply") or {}).get("motion_apply") or {}).get("bvh")
+        if args.blend and bvh and result.get("status") == "succeeded":
+            _say(f"Putting the motion on {args.blend}")
+            result["applied"] = service.motion_apply(args.blend, bvh, blender=args.blender, wait=None)
+        return result
+    if command == "motion-apply":
+        if args.bpy:
+            return service.motion_snippet(args.bvh, armature=args.armature, in_place=args.in_place)
+        if not args.blend:
+            raise LoopcutError("motion-apply needs --blend PATH (or --bpy for Python to run in an open Blender).",
+                               "invalid_input", {"field": "blend"})
+        return service.motion_apply(args.blend, args.bvh, armature=args.armature, in_place=args.in_place,
+                                    frame_start=args.frame_start, out=args.out, blender=args.blender, wait=None)
     if command == "start":
         return service.start(args.quote_id, confirm_token=args.confirm_token, wait=0, download=False)
     if command == "status":
@@ -261,5 +290,8 @@ def main(argv=None):
         return 1
     except KeyboardInterrupt:
         return 130
+    if isinstance(result, str):  # motion-apply --bpy: Python to paste or pipe into Blender.
+        print(result, file=output)
+        return 0
     print(json.dumps(result, indent=2, ensure_ascii=False), file=output)
     return 0

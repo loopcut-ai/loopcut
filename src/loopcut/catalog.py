@@ -18,7 +18,8 @@ AGENT_TOOLS = json.loads((_HERE / "agent_tools.json").read_text(encoding="utf-8"
 # Availability reasons that mean the account can't use the tool at all; the tool is hidden.
 _HIDDEN_REASONS = {"disabled", "region"}
 MIME_NAMES = {"image/png": "PNG", "image/jpeg": "JPEG", "image/webp": "WebP", "model/gltf-binary": "GLB",
-              "model/vnd.fbx": "FBX", "audio/wav": "WAV", "audio/mpeg": "MP3", "video/mp4": "MP4"}
+              "model/vnd.fbx": "FBX", "audio/wav": "WAV", "audio/mpeg": "MP3", "video/mp4": "MP4",
+              "video/quicktime": "MOV", "video/webm": "WebM"}
 
 
 def snapshot():

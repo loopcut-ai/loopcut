@@ -52,6 +52,19 @@ def closed_port():
         return probe.getsockname()[1]
 
 
+class JobResultTests(unittest.TestCase):
+    def test_partial_job_tells_the_model_how_to_finish(self):
+        partial = {"requested": 288, "delivered": 200, "cause": "input", "resume_input": {"frame_start": 201},
+                   "message": "Rendered 200 of 288 frames; Blender stopped with an error while rendering frame 201."}
+        job = {"id": "job_x", "tool": "render", "status": "succeeded", "progress": {"pct": 100, "message": "Done"},
+               "credits": {"reserved": 221, "charged": 11, "refunded": 210}, "outputs": [], "error": None, "partial": partial}
+        result = service.Service._job_result(job)
+        self.assertEqual(result["partial"], partial)
+        self.assertTrue(result["next"].startswith("Only part finished: Rendered 200 of 288 frames"))
+        self.assertIn("partial.resume_input", result["next"])
+        self.assertNotIn("partial", service.Service._job_result({**job, "partial": None}))
+
+
 @unittest.skipUnless(MOCK.is_file(), "contract mock not available outside loopcut-web")
 class MockEndToEnd(unittest.TestCase):
     def setUp(self):

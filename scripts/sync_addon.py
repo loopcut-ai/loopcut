@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-FILES = ("bundles.py", "blobs.py", "cloud_http.py")
+FILES = ("bundles.py", "blobs.py", "cloud_http.py", "motion_retarget.py")
 TARGET = Path(__file__).resolve().parents[1] / "src" / "loopcut" / "addon"
 
 

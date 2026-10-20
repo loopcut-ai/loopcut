@@ -502,9 +502,9 @@
     "properties": {
      "prompt": {
       "type": "string",
-      "maxLength": 4000,
+      "maxLength": 1024,
       "minLength": 1,
-      "description": "Describe the object to generate. Optional when an image file is supplied; otherwise required, at most 4000 characters."
+      "description": "Describe the object to generate. Optional when an image file is supplied; otherwise required, at most 1024 characters."
      },
      "quality": {
       "enum": [
@@ -605,6 +605,179 @@
    },
    "data_class": "A",
    "status": "coming_soon"
+  },
+  {
+   "byok": null,
+   "cost": {
+    "quote_required": false,
+    "credits_estimate": 25
+   },
+   "kind": "gen",
+   "name": "motion_from_text",
+   "apply": "apply_motion",
+   "title": "Motion from text",
+   "output": {
+    "type": "motion",
+    "formats": [
+     "bvh",
+     "json"
+    ]
+   },
+   "status": "coming_soon",
+   "display": {
+    "title": "Motion from text",
+    "summary": "Make a character animation from a short description of an action.",
+    "category": "characters"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 100
+   },
+   "backends": [
+    "managed"
+   ],
+   "namespace": "loopcut_cloud",
+   "apply_args": {
+    "type": "object",
+    "properties": {
+     "in_place": {
+      "type": "boolean",
+      "description": "Keep the pelvis over its starting position, so the character animates without travelling (for loops and game clips). Defaults to false."
+     },
+     "target_armature": {
+      "type": "string",
+      "maxLength": 63,
+      "minLength": 1,
+      "description": "Name of the armature object in the open scene to put the motion on: a Mixamo, Rigify, Auto-Rig Pro, Unreal mannequin or other humanoid rig. Omit it to use the active or the only selected humanoid armature; with none, the motion is imported on its own skeleton with a simple body."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "description": "Generates a humanoid body animation from a short description of one action, with NVIDIA Kimodo (built with Meta Llama 3). Use it for walks, runs, jumps, gestures, dances and other full-body actions, not facial animation, finger work, holding props or interacting with objects; the fingers stay still. One action per prompt, at most 400 characters, and 2–10 seconds of motion; it costs 5 credits per second of motion, rounded up to whole seconds, and takes under a minute, or a few minutes when the service starts cold. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling.",
+   "file_inputs": [],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "properties": {
+     "seed": {
+      "type": "integer",
+      "maximum": 2147483647,
+      "minimum": 0,
+      "description": "Optional random seed; the same prompt, length and seed give the same motion. Omit it for a new variation each run."
+     },
+     "prompt": {
+      "type": "string",
+      "maxLength": 400,
+      "minLength": 1,
+      "description": "One action in plain words, e.g. \"a person walks forward four steps, stops and waves with the right hand\"; at most 400 characters."
+     },
+     "duration_s": {
+      "type": "number",
+      "maximum": 10,
+      "minimum": 2,
+      "description": "Length of the motion in seconds, 2–10. Defaults to 5."
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "byok": null,
+   "cost": {
+    "quote_required": true,
+    "credits_estimate": 30
+   },
+   "kind": "assist",
+   "name": "motion_from_video",
+   "apply": "apply_motion",
+   "title": "Motion from video",
+   "output": {
+    "type": "motion",
+    "formats": [
+     "bvh",
+     "json"
+    ]
+   },
+   "status": "coming_soon",
+   "display": {
+    "title": "Motion from video",
+    "summary": "Capture a person's movement from a video and put it on your character's rig.",
+    "category": "characters"
+   },
+   "latency": "minutes",
+   "version": 1,
+   "approval": {
+    "confirm_over_credits": 100
+   },
+   "backends": [
+    "managed"
+   ],
+   "namespace": "loopcut_cloud",
+   "apply_args": {
+    "type": "object",
+    "properties": {
+     "in_place": {
+      "type": "boolean",
+      "description": "Keep the pelvis over its starting position, so the character animates without travelling (for loops and game clips). Defaults to false."
+     },
+     "target_armature": {
+      "type": "string",
+      "maxLength": 63,
+      "minLength": 1,
+      "description": "Name of the armature object in the open scene to put the motion on: a Mixamo, Rigify, Auto-Rig Pro, Unreal mannequin or other humanoid rig. Omit it to use the active or the only selected humanoid armature; with none, the motion is imported on its own skeleton with a simple body."
+     }
+    },
+    "additionalProperties": false
+   },
+   "data_class": "A",
+   "description": "Captures a person's full-body motion, hands included, from a video, with NVIDIA GEM-X. Use it to turn the user's own performance or a reference clip into animation, not to generate motion from words. Works best with one person, the whole body in view, a mostly still camera and good light; first-person views, gloved or hidden hands, heavy occlusion and fast spins track poorly. The video must be MP4, MOV or WebM up to 200 MB, and the captured part at most 60 seconds (choose it with start_s and end_s); it costs 3 credits per second of video captured, rounded up to whole seconds with a 2-second minimum, quoted first, and takes one to a few minutes. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling.",
+   "file_inputs": [
+    {
+     "field": "video",
+     "accept": [
+      "video/mp4",
+      "video/quicktime",
+      "video/webm"
+     ],
+     "max_mb": 200,
+     "required": true
+    }
+   ],
+   "bundle_input": null,
+   "input_schema": {
+    "type": "object",
+    "required": [],
+    "properties": {
+     "end_s": {
+      "type": "number",
+      "maximum": 86400,
+      "description": "Second of the video where the capture ends, at most 60 seconds after start_s. Defaults to the end of the video.",
+      "exclusiveMinimum": 0
+     },
+     "start_s": {
+      "type": "number",
+      "maximum": 86400,
+      "minimum": 0,
+      "description": "Second of the video where the capture starts. Defaults to 0."
+     },
+     "static_camera": {
+      "type": "boolean",
+      "description": "True when the camera does not move (a tripod shot); it steadies the character's path through the scene. Defaults to false."
+     },
+     "video_seconds": {
+      "type": "number",
+      "maximum": 86400,
+      "description": "Length of the uploaded video in seconds, as the client measured it. The quote and the capture cover at most this much; omitted, the quote holds the 60-second maximum and the charge is the seconds actually captured (2 seconds at least).",
+      "exclusiveMinimum": 0
+     }
+    },
+    "additionalProperties": false
+   }
   },
   {
    "byok": null,

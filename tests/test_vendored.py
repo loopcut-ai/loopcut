@@ -6,13 +6,14 @@ from pathlib import Path
 
 VENDORED = Path(__file__).resolve().parents[1] / "src" / "loopcut" / "addon"
 ADDON = os.environ.get("LOOPCUT_ADDON_DIR")
+FILES = ("bundles.py", "blobs.py", "cloud_http.py", "motion_retarget.py")
 
 
 @unittest.skipUnless(ADDON, "set LOOPCUT_ADDON_DIR to a loopcut/blender checkout to compare")
 class Vendored(unittest.TestCase):
     def test_copies_match_the_addon(self):
         source = Path(ADDON) / "scripts" / "addons_core" / "loopcut"
-        for name in ("bundles.py", "blobs.py", "cloud_http.py"):
+        for name in FILES:
             with self.subTest(name):
                 self.assertEqual((VENDORED / name).read_bytes(), (source / name).read_bytes(),
                                  f"{name} differs from the add-on: run scripts/sync_addon.py")

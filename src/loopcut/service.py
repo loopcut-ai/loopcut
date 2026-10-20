@@ -24,12 +24,12 @@ import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import __version__, pack, state
+from . import __version__, media, motion, pack, state
 from . import catalog as catalogs
 from .addon import blobs, cloud_http
 
 DEFAULT_SERVICE_URL = "https://loopcut.org"
-HEADERS = {"x-loopcut-contract": "0.6", "x-loopcut-client": f"loopcut/{__version__}"}
+HEADERS = {"x-loopcut-contract": "0.7", "x-loopcut-client": f"loopcut/{__version__}"}
 RENDER = "render"
 TERMINAL = {"succeeded", "failed", "canceled"}
 POLL_SECONDS = {RENDER: 5}  # Other tools are polled every 2 s: most finish in seconds.
@@ -42,7 +42,7 @@ LISTED = 12
 _SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 _EXTENSIONS = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "application/json": ".json",
                "model/gltf-binary": ".glb", "model/vnd.fbx": ".fbx", "audio/wav": ".wav", "audio/x-wav": ".wav",
-               "audio/mpeg": ".mp3", "video/mp4": ".mp4"}
+               "audio/mpeg": ".mp3", "video/mp4": ".mp4", "application/x-bvh": ".bvh"}
 SIGN_IN_MESSAGE = "Not signed in to Loopcut, or the key was revoked. Call loopcut_login (CLI: loopcut login)."
 _KEEP = {"confirm_url", "balance", "needed", "upgrade", "confirm_token", "retry_after", "field", "daily_limit",
          "spent_today", "resets_at", "plan", "data_class", "scope", "refunded", "min_client"}
@@ -144,13 +144,14 @@ def _warnings(packed):
     return lines
 
 
-_SNIFFED = {"image/png", "image/jpeg", "image/webp", "audio/wav", "audio/x-wav", "model/gltf-binary", "model/vnd.fbx"}
+_SNIFFED = {"image/png", "image/jpeg", "image/webp", "audio/wav", "audio/x-wav", "model/gltf-binary", "model/vnd.fbx",
+            "video/mp4", "video/quicktime", "video/webm"}
 
 
 def _sniff(path):
     """The MIME type of a local file from its first bytes, else from its extension."""
     with open(path, "rb") as handle:
-        head = handle.read(32)
+        head = handle.read(64)
     if head.startswith(b"\x89PNG\r\n\x1a\n"):
         return "image/png"
     if head.startswith(b"\xff\xd8\xff"):
@@ -163,6 +164,9 @@ def _sniff(path):
         return "model/gltf-binary"
     if head.startswith(b"Kaydara FBX Binary"):
         return "model/vnd.fbx"
+    video = media.sniff_video(head)
+    if video:
+        return video
     guess = mimetypes.guess_type(Path(path).name)[0]
     if guess in _SNIFFED:
         return "application/octet-stream"  # Named like one of the types above, but its bytes are not.
@@ -201,6 +205,25 @@ def _local_files(descriptor, files):
         if spec.get("required") and field not in given:
             kinds = " or ".join(catalogs.MIME_NAMES.get(mime, mime) for mime in spec["accept"])
             raise LoopcutError(f"{field} is required: a local path to a {kinds} file.", "invalid_input", {"field": field})
+    return found
+
+
+def _apply_args(descriptor, inputs):
+    """Take the descriptor's client-only apply_args (contract 0.7) out of inputs: they are kept with the quote
+    and job for applying the result here, and never sent to the server."""
+    schema = descriptor.get("apply_args") or {}
+    properties = schema.get("properties") or {}
+    found = {}
+    for name, spec in properties.items():
+        if name not in inputs:
+            continue
+        value = inputs.pop(name)
+        kind = spec.get("type")
+        if kind == "boolean" and type(value) is not bool or kind == "string" and not (
+                isinstance(value, str) and spec.get("minLength", 0) <= len(value) <= spec.get("maxLength", 1 << 16)):
+            raise LoopcutError(f"{name} must be a {'true or false' if kind == 'boolean' else 'non-empty name'}.",
+                               "invalid_input", {"field": name})
+        found[name] = value
     return found
 
 
@@ -494,10 +517,16 @@ class Service:
         if descriptor["name"] == RENDER:
             raise LoopcutError("Render needs a .blend: use render_quote (CLI: loopcut render).", "invalid_input")
         inputs = {key: value for key, value in (inputs or {}).items() if value is not None}
+        apply_args = _apply_args(descriptor, inputs)
         local = _local_files(descriptor, files)
+        if descriptor["name"] == motion.VIDEO_TOOL and local:
+            try:
+                inputs = motion.capture_inputs(inputs, local[0]["path"], local[0]["mime"])
+            except (motion.MotionError, media.MediaError) as ex:
+                raise LoopcutError(str(ex), "invalid_input", {"field": "video_seconds"}) from None
         self._require_key()
-        key = json.dumps(["tool", descriptor["name"], inputs, local], sort_keys=True)
-        task = self._task(key, lambda job: self._prepare_tool(job, descriptor, inputs, local, confirm_token),
+        key = json.dumps(["tool", descriptor["name"], inputs, local, apply_args], sort_keys=True)
+        task = self._task(key, lambda job: self._prepare_tool(job, descriptor, inputs, local, confirm_token, apply_args),
                           stale=_spent_or_expired)
         if not task.done.wait(_remaining(deadline)):
             return {"status": "preparing", "stage": task.stage, "message": task.message,
@@ -510,7 +539,7 @@ class Service:
             return quote
         return self.start(quote["quote_id"], confirm_token=confirm_token, wait=_remaining(deadline), out_dir=out_dir)
 
-    def _prepare_tool(self, task, descriptor, inputs, local, confirm_token):
+    def _prepare_tool(self, task, descriptor, inputs, local, confirm_token, apply_args=None):
         files = {}
         if local:
             task.stage = "uploading"
@@ -532,6 +561,8 @@ class Service:
         project = {"id": "dir-" + hashlib.sha256(str(self.work_dir()).encode("utf-8")).hexdigest()[:24], "no_generation": False}
         record = {"body": body, "tool_version": descriptor["version"], "project": project,
                   "local_files": {item["field"]: item["path"] for item in local}}
+        if apply_args:
+            record["apply_args"] = apply_args  # Client-only (contract 0.7): kept for applying, never sent.
         return self._new_quote(record, confirm_token)
 
     def _new_quote(self, record, confirm_token=None):
@@ -559,6 +590,8 @@ class Service:
                               "lasts 10 minutes and is the most the job can cost: it charges actual GPU time.")
         else:
             result["input"] = body["input"]
+            if record.get("apply_args"):
+                result["apply_args"] = record["apply_args"]
             result["next"] = ("Tell the user the price; once they agree (or it is within a budget they gave), call "
                               "job_start with this quote_id. The quote lasts 10 minutes and is the most the job can cost.")
         return result
@@ -592,7 +625,7 @@ class Service:
         for attempt in (1, 2):  # The second only after the server called the quote expired.
             if attempt == 2 or _expired(record["expires_at"], QUOTE_MARGIN):
                 renewed = self._new_quote({key: record[key] for key in record if key in {
-                    "body", "tool_version", "blend", "packed", "project", "local_files"}}, token)
+                    "body", "tool_version", "blend", "packed", "project", "local_files", "apply_args"}}, token)
                 if renewed["credits"] != record["credits"]:
                     return {**renewed, "status": "requoted",
                             "next": "The quote expired and the price changed. Confirm the new price, then call job_start with the new quote_id."}
@@ -618,7 +651,9 @@ class Service:
             target = self.work_dir() / ("loopcut_renders" if tool == RENDER else "loopcut_outputs") / job["id"]
         state.save("jobs", job["id"], {"job_id": job["id"], "quote_id": record["quote_id"], "tool": tool,
                                        "blend": record.get("blend"), "out_dir": str(target),
-                                       "credits_quoted": record["credits"], "created_at": _now().isoformat(timespec="seconds")})
+                                       "credits_quoted": record["credits"], "created_at": _now().isoformat(timespec="seconds"),
+                                       **({"apply_args": record["apply_args"]} if record.get("apply_args") else {}),
+                                       **({"title": _title(record)} if _title(record) else {})})
         for done in dict.fromkeys((original["quote_id"], record["quote_id"])):
             state.save("quotes", done, {**(state.load("quotes", done) or record), "job_id": job["id"]})
         return self._follow(job, deadline, download=download, out_dir=None)
@@ -653,8 +688,12 @@ class Service:
                   "progress": job.get("progress"), "credits": job.get("credits")}
         if job.get("error"):
             result["error"] = {"code": job["error"].get("code"), "message": job["error"].get("message")}
+        partial = job.get("partial") if status == "succeeded" else None
+        if isinstance(partial, dict):
+            result["partial"] = partial
         result["next"] = {
-            "succeeded": "Call job_status to download the results.",
+            "succeeded": (f"Only part finished: {partial.get('message')} For the rest, quote and start a new job with the same input "
+                          "plus partial.resume_input. " if isinstance(partial, dict) else "") + "Call job_status to download the results.",
             "failed": "Unspent credits were refunded. Fix the cause, then quote again: a retry is a new quote and job.",
             "canceled": "Unspent credits were refunded.",
         }.get(status, "Still running; call job_status with wait_seconds to wait for it."
@@ -676,7 +715,7 @@ class Service:
         else:
             out = self.work_dir() / ("loopcut_renders" if job.get("tool") == RENDER else "loopcut_outputs") / job["id"]
         key = json.dumps(["fetch", job["id"], str(out)])
-        task = self._task(key, lambda work: self._download_all(work, job, out))
+        task = self._task(key, lambda work: self._download_all(work, job, out, record))
         if not task.done.wait(wait):
             return {"job_id": job["id"], "downloading": True, "out_dir": str(out), "files_saved": task.count,
                     "files_total": len(job.get("outputs") or []), "message": task.message,
@@ -688,7 +727,62 @@ class Service:
             raise task.error
         return task.result
 
-    def _download_all(self, task, job, out):
+    # ------------------------------------------------------------------ motion
+
+    def motion_apply(self, blend, bvh, *, armature=None, in_place=None, frame_start=None, out=None, blender=None,
+                     wait=None):
+        """Put a motion result on the rig in a saved .blend with a local headless Blender, and save it. Free: no
+        account needed. armature and in_place default to what the motion tool was called with. Returns while
+        Blender is still working after `wait` seconds; the next call with the same arguments picks it up."""
+        try:
+            bvh = motion.find_bvh(bvh)
+            path = Path(blend).expanduser().resolve()
+            if not path.is_file() or path.suffix.lower() != ".blend":
+                raise motion.MotionError(f"Not a saved .blend file: {path}. Save the scene first.")
+            pack.find_blender(blender)
+        except (motion.MotionError, pack.PackError) as ex:
+            raise LoopcutError(str(ex), "invalid_input") from None
+        record = _motion_job(bvh)
+        kept = record.get("apply_args") or {}
+        armature = armature if armature else kept.get("target_armature")
+        in_place = in_place if in_place is not None else kept.get("in_place") is True
+        out = str(Path(out).expanduser().resolve()) if out else None
+        blender = str(blender) if blender else None
+        if frame_start is not None and type(frame_start) is not int:
+            raise LoopcutError("frame_start must be a whole frame number.", "invalid_input", {"field": "frame_start"})
+
+        def run(work):
+            try:
+                return motion.apply_blend(path, bvh, armature=armature, in_place=in_place, frame_start=frame_start,
+                                          title=record.get("title"), out=out, blender=blender, progress=work.say)
+            except motion.MotionError as ex:
+                raise LoopcutError(str(ex), "apply_failed") from None
+
+        key = json.dumps(["motion_apply", str(path), str(bvh), armature, in_place, frame_start, out, blender])
+        task = self._task(key, run)
+        if not task.done.wait(wait):
+            return {"status": "applying", "message": task.message, "elapsed_s": round(time.monotonic() - task.started),
+                    "next": "Blender is still applying the motion; call motion_apply again with the same arguments."}
+        with self._lock:
+            if self._tasks.get(key) is task:
+                del self._tasks[key]  # A later call with the same arguments applies again.
+        if task.error:
+            raise task.error
+        return task.result
+
+    def motion_snippet(self, bvh, *, armature=None, in_place=None):
+        """Python that applies a motion result inside a Blender that is already open (motion-apply --bpy)."""
+        try:
+            bvh = motion.find_bvh(bvh)
+        except motion.MotionError as ex:
+            raise LoopcutError(str(ex), "invalid_input", {"field": "bvh"}) from None
+        record = _motion_job(bvh)
+        kept = record.get("apply_args") or {}
+        return motion.bpy_snippet(bvh, armature=armature or kept.get("target_armature"),
+                                  in_place=in_place if in_place is not None else kept.get("in_place") is True,
+                                  title=record.get("title"))
+
+    def _download_all(self, task, job, out, record=None):
         out.mkdir(parents=True, exist_ok=True)
         client = self._client(timeout=120)
         outputs = job.get("outputs") or []
@@ -703,7 +797,27 @@ class Service:
                     raise _from_cloud(ex, job.get("tool")) from None
             saved.append((output, target))
             task.count = len(saved)
-        return _outputs_result(job, out, saved)
+        return _outputs_result(job, out, saved, record)
+
+
+def _motion_job(bvh):
+    """The connector's record of the job that saved this motion.bvh (in loopcut_outputs/<job_id>/), if any."""
+    name = Path(bvh).parent.name
+    if not re.fullmatch(r"job_[A-Za-z0-9_-]{1,120}", name):
+        return {}
+    try:
+        return state.load("jobs", name) or {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _title(record):
+    """A motion's name in Blender, as the add-on names it: the prompt, else the video's file name."""
+    prompt = (record.get("body") or {}).get("input", {}).get("prompt")
+    if isinstance(prompt, str) and prompt.strip():
+        return prompt.strip()
+    video = (record.get("local_files") or {}).get("video")
+    return Path(video).stem if video else None
 
 
 def _job_id(value):
@@ -747,7 +861,7 @@ def _download(client, output, target):
         temporary.unlink(missing_ok=True)
 
 
-def _outputs_result(job, out, saved):
+def _outputs_result(job, out, saved, record=None):
     tool = job.get("tool")
     result = {"job_id": job["id"], "out_dir": str(out), "files_saved": len(saved)}
     report = next((target for output, target in saved if output.get("type") == "report"), None)
@@ -765,6 +879,10 @@ def _outputs_result(job, out, saved):
         return result
     result["files"] = [{"path": str(target), "type": output.get("type"), "mime": output.get("mime"),
                         **({"meta": output["meta"]} if output.get("meta") else {})} for output, target in saved][:LISTED]
+    if tool in motion.TOOLS or any(output.get("type") == "motion" for output, _ in saved):
+        record = record or {}
+        result.update(motion.result_for([target for _, target in saved], record.get("apply_args"), record.get("title")))
+        return result
     result["next"] = _import_hint(output.get("mime") for output, _ in saved)
     return result
 

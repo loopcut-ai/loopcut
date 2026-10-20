@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "loopcut",
-  "version": "0.1.1",
-  "description": "Loopcut's cloud tools for Blender work: render .blend files on cloud GPUs, search free assets, make 3D models, sound effects and voice lines, billed to your Loopcut credits. Works with any Blender install.",
+  "version": "0.2.0",
+  "description": "Loopcut's cloud tools for Blender work: render .blend files on cloud GPUs, search free assets, make 3D models, character motion, sound effects and voice lines, billed to your Loopcut credits. Works with any Blender install.",
   "author": {
     "name": "Loopcut",
     "email": "hello@loopcut.org",
@@ -16,8 +16,8 @@
     "com.openai": {
       "interface": {
         "displayName": "Loopcut",
-        "shortDescription": "Cloud renders, free assets, 3D models and audio for Blender",
-        "longDescription": "Render a saved .blend on cloud RTX 4090s and get the frames back, search free CC0 models, materials and HDRIs, turn images into 3D models, remesh meshes, and make sound effects and voice lines. Every paid tool quotes its price first, and results come back as files Codex imports with Blender's Python. Paid from your Loopcut account's credits.",
+        "shortDescription": "Cloud renders, assets, 3D models, motion and audio for Blender",
+        "longDescription": "Render a saved .blend on cloud RTX 4090s and get the frames back, search free CC0 models, materials and HDRIs, turn images into 3D models, remesh meshes, capture character motion from video or make it from text, and make sound effects and voice lines. Every paid tool quotes its price first, and results come back as files Codex imports with Blender's Python. Paid from your Loopcut account's credits.",
         "developerName": "Loopcut",
         "category": "Design",
         "capabilities": ["Read", "Write"],
