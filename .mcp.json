@@ -2,7 +2,7 @@
   "mcpServers": {
     "loopcut": {
       "command": "uvx",
-      "args": ["loopcut==0.2.0", "mcp"]
+      "args": ["loopcut==0.2.1", "mcp"]
     },
     "loopcut-cloud": {
       "type": "http",

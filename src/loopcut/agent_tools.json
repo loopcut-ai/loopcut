@@ -39,7 +39,7 @@
     },
     "motion_from_text": {
       "name": "motion_from_text",
-      "description": "Make 2-10 s of humanoid body animation from a short description of one action (NVIDIA Kimodo, built with Meta Llama 3). 5 credits per second of motion. Fingers stay still; not for faces, props or finger work. Returns motion.bvh (SOMA 77-joint skeleton) and motion.json; motion_apply then puts it on the user's rig in a .blend."
+      "description": "Make 2-10 s of humanoid body animation from a short description of one action (NVIDIA Kimodo, built with Meta Llama 3). 2 credits per second of motion. Fingers stay still; not for faces, props or finger work. Returns motion.bvh (SOMA 77-joint skeleton) and motion.json; motion_apply then puts it on the user's rig in a .blend."
     }
   }
 }

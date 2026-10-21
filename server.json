@@ -8,12 +8,12 @@
     "url": "https://github.com/loopcut-ai/loopcut",
     "source": "github"
   },
-  "version": "0.2.0",
+  "version": "0.2.1",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "loopcut",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

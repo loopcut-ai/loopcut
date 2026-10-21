@@ -35,7 +35,7 @@ Two motion tools appear once they open on Loopcut, with a free local tool to use
 | Tool | What it does | Price | Result |
 |---|---|---|---|
 | `motion_from_video` | Captures a person's whole-body motion, hands included, from a local MP4, MOV or WebM (NVIDIA GEM-X). One person, whole body in view, a mostly still camera; at most 60 s per job, chosen with `start_s` and `end_s`, from a file up to 200 MB | 3 credits per second captured, 2-second minimum | `motion.bvh` + `motion.json` |
-| `motion_from_text` | Makes 2–10 s of body animation from a description of one action (NVIDIA Kimodo, **Built with Meta Llama 3**). The fingers stay still; it isn't for faces, props or finger work | 5 credits per second of motion | `motion.bvh` + `motion.json` |
+| `motion_from_text` | Makes 2–10 s of body animation from a description of one action (NVIDIA Kimodo, **Built with Meta Llama 3**). The fingers stay still; it isn't for faces, props or finger work | 2 credits per second of motion | `motion.bvh` + `motion.json` |
 | `motion_apply` | Retargets a result onto the humanoid rig in a saved `.blend` with your Blender, headless, and saves the file. Mixamo, Rigify, Auto-Rig Pro, Unreal mannequin, or any humanoid by bone names; with no rig, SOMA's own skeleton with a simple body. Free and local | free | the animated `.blend` |
 
 `motion.bvh` is a rig-neutral SOMA 77-joint skeleton (standing T-pose rest, centimetres, Y up, 30 fps).

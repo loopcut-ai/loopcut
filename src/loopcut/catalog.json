@@ -610,7 +610,7 @@
    "byok": null,
    "cost": {
     "quote_required": false,
-    "credits_estimate": 25
+    "credits_estimate": 10
    },
    "kind": "gen",
    "name": "motion_from_text",
@@ -655,7 +655,7 @@
     "additionalProperties": false
    },
    "data_class": "A",
-   "description": "Generates a humanoid body animation from a short description of one action, with NVIDIA Kimodo (built with Meta Llama 3). Use it for walks, runs, jumps, gestures, dances and other full-body actions, not facial animation, finger work, holding props or interacting with objects; the fingers stay still. One action per prompt, at most 400 characters, and 2–10 seconds of motion; it costs 5 credits per second of motion, rounded up to whole seconds, and takes under a minute, or a few minutes when the service starts cold. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling.",
+   "description": "Generates a humanoid body animation from a short description of one action, with NVIDIA Kimodo (built with Meta Llama 3). Use it for walks, runs, jumps, gestures, dances and other full-body actions, not facial animation, finger work, holding props or interacting with objects; the fingers stay still. One action per prompt, at most 400 characters, and 2–10 seconds of motion; it costs 2 credits per second of motion, rounded up to whole seconds, and takes under a minute, or a few minutes when the service starts cold. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling.",
    "file_inputs": [],
    "bundle_input": null,
    "input_schema": {

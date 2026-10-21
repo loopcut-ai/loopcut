@@ -1,7 +1,7 @@
 {
   "name": "loopcut",
   "description": "Loopcut's cloud tools in Claude Code: render .blend files on cloud GPUs, search free assets, make 3D models, character motion, sound effects and voice lines, billed to your Loopcut credits. Works with any Blender install.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "Loopcut",
     "url": "https://loopcut.org"

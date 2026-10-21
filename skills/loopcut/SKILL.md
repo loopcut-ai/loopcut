@@ -46,7 +46,7 @@ after they approve. `loopcut_login` signs in or switches accounts on purpose.
   `start_s`/`end_s`. Price: 3 credits per second captured, 2-second minimum. Leave `video_seconds` out:
   the connector measures the clip (it asks only for a WebM it can't measure). Hands are captured.
 - **`motion_from_text`** when there's no footage: one action per prompt ("a person walks forward four
-  steps, stops and waves with the right hand"), `duration_s` 2-10. Price: 5 credits per second of motion.
+  steps, stops and waves with the right hand"), `duration_s` 2-10. Price: 2 credits per second of motion.
   The fingers stay still, and it doesn't do faces, props or touching objects: say so if the user needs
   them. Built with Meta Llama 3 (NVIDIA Kimodo's text encoder).
 - With no-generation on, `motion_from_video` stays (it's the user's own performance) and
@@ -92,7 +92,7 @@ libraries.
   then quote the full job.
 - Animations: frames default to frame 1 only. Pass `frame_start`/`frame_end` (the quote shows the scene's
   range) and `frame_step` for previews. Match the engine: `engine: "eevee"` for EEVEE scenes. Cycles
-  needs a Pro or Max plan; on the free plan, ask before rendering a Cycles scene with EEVEE.
+  and EEVEE both run on any plan's credits.
 - `turntable: {}` orbits the whole scene; `turntable: {"targets": ["Chair"]}` frames chosen objects.
 - Check the render quote's `warnings`: missing textures render pink. Fix them and quote again.
 - Asset search results carry licence and credit lines; show `show_credit` with them.
@@ -100,7 +100,7 @@ libraries.
 ## Errors
 
 Errors carry a `code` and a message that says what to do. `insufficient_credits`: the user gets a plan,
-or tops up on Pro or Max. `plan_required`: Cycles needs Pro or Max; offer EEVEE or the `upgrade` link. `age_confirmation_required`: they confirm once at `confirm_url`. `daily_limit_reached` or
+or tops up on Pro or Max. `age_confirmation_required`: they confirm once at `confirm_url`. `daily_limit_reached` or
 `rate_limited` with a `confirm_token`: pass it back only if the user approves. `private_mode`: the
 account's Private mode blocks that tool (today, sound effects); only the user can turn it off.
 `generation_disabled`: generation is off for the account. A motion job that fails with `invalid_input`
