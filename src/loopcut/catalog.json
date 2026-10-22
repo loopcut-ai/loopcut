@@ -655,7 +655,7 @@
     "additionalProperties": false
    },
    "data_class": "A",
-   "description": "Generates a humanoid body animation from a short description of one action, with NVIDIA Kimodo (built with Meta Llama 3). Use it for walks, runs, jumps, gestures, dances and other full-body actions, not facial animation, finger work, holding props or interacting with objects; the fingers stay still. One action per prompt, at most 400 characters, and 2–10 seconds of motion; it costs 2 credits per second of motion, rounded up to whole seconds, and takes under a minute, or a few minutes when the service starts cold. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling.",
+   "description": "Generates a humanoid body animation from a short description, with NVIDIA Kimodo (built with Meta Llama 3). Good at grounded full-body motion: walks, runs, dances, kicks, punches, gestures and fighting in place. Weak at acrobatics: flips, spins in the air and big jumps come out small or missing. No facial animation, finger work, holding props or interacting with objects; the fingers stay still. Describe one simple physical action in plain words, saying what the body does, not choreography. Each sentence becomes its own segment with an equal share of the time (when each gets at least 2 seconds), so write a sequence as one short sentence per action, or make separate calls, and add no sentence of style words. At most 400 characters and 2–10 seconds of motion; it costs 2 credits per second of motion, rounded up to whole seconds, and takes under a minute, or a few minutes when the service starts cold. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling. Then check what the motion does and report that, not what was asked. If it misses the brief, call again with a simpler prompt (charged again) or tell the user what it made; never fake missing body motion by keyframing the root, hips or whole body over it. A small local touch-up the user asked for or that clearly helps, such as a hand pose or a held end pose, is fine if you say so.",
    "file_inputs": [],
    "bundle_input": null,
    "input_schema": {
@@ -674,7 +674,7 @@
       "type": "string",
       "maxLength": 400,
       "minLength": 1,
-      "description": "One action in plain words, e.g. \"a person walks forward four steps, stops and waves with the right hand\"; at most 400 characters."
+      "description": "One simple physical action in plain words, e.g. \"a person does a high kick with the right leg\"; each sentence becomes a separate segment. At most 400 characters."
      },
      "duration_s": {
       "type": "number",
@@ -735,7 +735,7 @@
     "additionalProperties": false
    },
    "data_class": "A",
-   "description": "Captures a person's full-body motion, hands included, from a video, with NVIDIA GEM-X. Use it to turn the user's own performance or a reference clip into animation, not to generate motion from words. Works best with one person, the whole body in view, a mostly still camera and good light; first-person views, gloved or hidden hands, heavy occlusion and fast spins track poorly. The video must be MP4, MOV or WebM up to 200 MB, and the captured part at most 60 seconds (choose it with start_s and end_s); it costs 3 credits per second of video captured, rounded up to whole seconds with a 2-second minimum, quoted first, and takes one to a few minutes. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling.",
+   "description": "Captures a person's full-body motion, hands included, from a video, with NVIDIA GEM-X. Use it to turn the user's own performance or a reference clip into animation, not to generate motion from words. Works best with one person, the whole body in view, a mostly still camera and good light; first-person views, gloved or hidden hands, heavy occlusion and fast spins track poorly. The video must be MP4, MOV or WebM up to 200 MB, and the captured part at most 60 seconds (choose it with start_s and end_s); it costs 3 credits per second of video captured, rounded up to whole seconds with a 2-second minimum, quoted first, and takes one to a few minutes. Applying the result retargets the motion onto target_armature (or the selected humanoid armature) or, with none, imports it on its own skeleton with a simple body; in_place keeps it from travelling. Then check what was captured and report that; where tracking failed, say so instead of faking the missing motion with root, hips or whole-body keyframes.",
    "file_inputs": [
     {
      "field": "video",

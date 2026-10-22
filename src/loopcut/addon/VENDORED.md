@@ -8,7 +8,7 @@ retries that were fixed live on 2026-10-17), and puts motion results on a rig ex
 `apply_motion` does (`loopcut motion-apply` and the `motion_apply` tool run it in a headless Blender
 through `loopcut/motion_blender.py`).
 
-Source: add-on development commit `55b1113c5307` (branch `feat/motion-client`).
+Source: add-on development commit `76ec5038ec33` (branch `track/client`).
 
 Do not edit them here. Change the add-on, then copy the files again:
 

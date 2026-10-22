@@ -126,7 +126,8 @@ def result_for(files, apply_args=None, title=None):
         "bpy": bpy_snippet(bvh, armature=armature, in_place=in_place, title=title),
         "plain_import": BVH_IMPORT.format(path=repr(str(bvh))),
     }
-    fingers = " The fingers don't move in this motion (text to motion animates the body only)." \
+    fingers = (" The fingers don't move in this motion (text to motion animates the body only); motion_apply and "
+               "apply.bpy give the rig's fingers a relaxed pose instead of its rest.") \
         if motion.get("fingers_animated") is False else ""
     return {"motion": motion, "apply": apply, "next": (
         "Done. To put the motion on the user's character in a saved .blend, call motion_apply with blend and "
@@ -184,7 +185,10 @@ def apply_blend(blend, bvh, *, armature=None, in_place=False, frame_start=None, 
             "picked": answer.get("picked"), "scene_frames": answer.get("scene_frames"), "blender": executable,
             **({"previous_version": str(backup)} if target == blend and backup.is_file() else {}),
             "next": ("Open the .blend (or revert it if Blender has it open) and play the animation; look at a few "
-                     "frames before telling the user it is done.")}
+                     "frames before telling the user it is done, and describe what the motion actually does, not "
+                     "what was asked. If a motion_from_text result misses the brief, run it again with a simpler prompt "
+                     "(charged again); otherwise say what it lacks. Never keyframe the root, hips or whole body over it "
+                     "to fake missing motion.")}
 
 
 def _tail(log):

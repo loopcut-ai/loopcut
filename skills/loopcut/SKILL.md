@@ -45,10 +45,14 @@ after they approve. `loopcut_login` signs in or switches accounts on purpose.
   footage, hidden hands and fast spins track poorly. One job captures at most 60 s: pick the part with
   `start_s`/`end_s`. Price: 3 credits per second captured, 2-second minimum. Leave `video_seconds` out:
   the connector measures the clip (it asks only for a WebM it can't measure). Hands are captured.
-- **`motion_from_text`** when there's no footage: one action per prompt ("a person walks forward four
-  steps, stops and waves with the right hand"), `duration_s` 2-10. Price: 2 credits per second of motion.
-  The fingers stay still, and it doesn't do faces, props or touching objects: say so if the user needs
-  them. Built with Meta Llama 3 (NVIDIA Kimodo's text encoder).
+- **`motion_from_text`** when there's no footage: one simple physical action per prompt, in plain words
+  about what the body does ("a person does a high kick with the right leg"), `duration_s` 2-10. Price: 2
+  credits per second of motion. Good at grounded motion (walks, dances, kicks, gestures, fighting in place);
+  weak at acrobatics (flips, spins in the air, big jumps come out small or missing), so say so up front.
+  Each sentence becomes its own segment sharing the time, so a sequence is one short sentence per action
+  (or separate calls) and never a trailing sentence of style words. The fingers stay still, and it doesn't
+  do faces, props or touching objects: say so if the user needs them. Built with Meta Llama 3 (NVIDIA
+  Kimodo's text encoder).
 - With no-generation on, `motion_from_video` stays (it's the user's own performance) and
   `motion_from_text` is hidden and refused.
 - Pass `target_armature` (the rig object, or the mesh it deforms) and `in_place` (no root travel, for loops
@@ -61,7 +65,11 @@ after they approve. `loopcut_login` signs in or switches accounts on purpose.
   - `apply.bpy`: Python for a Blender that is already open with the scene (for example another Blender
     MCP's execute-code tool). Use it instead of `motion_apply` when the user has the file open, then save.
   - `apply.plain_import`: Blender's own BVH import of the SOMA skeleton, when there's no rig.
-- Check a few frames afterwards (feet on the ground, arms not crossing the body) before calling it done.
+- Check a few frames afterwards (feet on the ground, arms not crossing the body) and tell the user what the
+  motion actually does, not what was asked. If it misses the brief, run `motion_from_text` again with a
+  simpler prompt (charged again) or say what it made. Never fake missing body motion by keyframing the
+  root, hips or whole body over the result; a small local touch-up (a hand pose, a held end pose) is fine
+  if you say so.
 
 ## No local Blender (claude.ai, the Code tab): `render` from a script
 
